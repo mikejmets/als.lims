@@ -13,4 +13,6 @@
     <adapter name='als.lims' factory=".sample.SampleSchemaExtender" />
     <adapter name='als.lims' factory=".sample.SampleSchemaModifier" />
 
+    <adapter name='als.lims' factory=".arreport.ARReportSchemaExtender" />
+
 </configure>
