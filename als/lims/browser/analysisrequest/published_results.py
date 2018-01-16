@@ -1,3 +1,4 @@
+from bika.lims import api
 from bika.lims.browser.analysisrequest.published_results import \
     AnalysisRequestPublishedResults as ARPR
 from AccessControl import getSecurityManager
@@ -8,6 +9,7 @@ from bika.lims.content.analysisrequest import schema as AnalysisRequestSchema
 from bika.lims.permissions import *
 from Products.CMFCore.utils import getToolByName
 from ZODB.POSException import POSKeyError
+
 
 class AnalysisRequestPublishedResults(ARPR):
 
@@ -27,6 +29,7 @@ class AnalysisRequestPublishedResults(ARPR):
             self.portal_url)
         self.title = self.context.translate(_("Published results"))
         self.columns = {
+            'COAID': {'title': _('COA ID')},
             'Date': {'title': _('Date')},
             'PublishedBy': {'title': _('Published By')},
             'Recipients': {'title': _('Recipients')},
@@ -38,6 +41,7 @@ class AnalysisRequestPublishedResults(ARPR):
              'title': 'All',
              'contentFilter': {},
              'columns': [
+                 'COAID',
                  'Date',
                  'PublishedBy',
                  'Recipients',
@@ -114,10 +118,11 @@ class AnalysisRequestPublishedResults(ARPR):
         fmt_date = self.ulocalized_time(creation_date, long_format=1)
         item['Date'] = fmt_date
 
-        # Recipients as mailto: links
+        # Links to recipient profiles
         recipients = obj.getRecipients()
-        links = ["<a href='mailto:{EmailAddress}'>{Fullname}</a>".format(**r)
-                 for r in recipients if r['EmailAddress']]
+        links = ["<a href='{Url}'>{Fullname}</a>".format(Fullname=r['Fullname'],
+            Url=api.get_url(api.get_object_by_uid(r['UID'])))
+            for r in recipients if r['EmailAddress']]
         if len(links) == 0:
             links = ["{Fullname}".format(**r) for r in recipients]
         item['replace']['Recipients'] = ', '.join(links)
@@ -136,6 +141,7 @@ class AnalysisRequestPublishedResults(ARPR):
             pass
         item['DownloadPDF'] = ''
         item['after']['DownloadPDF'] = ', '.join(dll)
+        
         # download link 'Download CSV (size)'
         dll = []
         if hasattr(obj, 'CSV'):

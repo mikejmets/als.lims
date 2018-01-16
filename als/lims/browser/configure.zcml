@@ -1,6 +1,7 @@
 <configure
         xmlns="http://namespaces.zope.org/zope"
         xmlns:plone="http://namespaces.plone.org/plone"
+        xmlns:browser="http://namespaces.zope.org/browser"
         i18n_domain="als.lims">
 
     <plone:static
@@ -8,6 +9,14 @@
             type="stickers"
             name="als-stickers"
     />
+
+  <browser:page
+      for="bika.lims.interfaces.IAnalysisRequest"
+      name="published_results"
+      class="bika.lims.browser.analysisrequest.AnalysisRequestPublishedResults"
+      permission="bika.lims.ManageAnalysisRequests"
+      layer="bika.lims.interfaces.IBikaLIMS"
+  />
 
 <!--
 <plone:static
