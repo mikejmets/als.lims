@@ -33,7 +33,6 @@
                         hasqcanalyses   python:len(qcanalyses) &gt; 0;
                         reportdrymatter analysisrequest/report_drymatter;
                         hasprevresults  analysisrequest/haspreviousresults;
-                        coanr           python:view.next_certificate_number();
                         showqcanalyses  python:view.isQCAnalysesVisible();
                         remarksenabled  python:view.context.bika_setup.getEnableAnalysisRemarks();">
 
@@ -67,7 +66,6 @@
   <!-- Address and Lab info -->
   <div id="section-info">
       <!-- This is required -->
-      <input type="hidden" name="coanr" tal:attributes="value python:coanr"/>
     <div id="accreditation-logo"
          tal:condition="python:laboratory['accredited']==True">
       <img tal:condition="laboratory/accreditation_logo"

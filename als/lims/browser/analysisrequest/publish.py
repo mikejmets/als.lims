@@ -3,6 +3,7 @@ import csv
 import StringIO
 import os
 import tempfile
+#from bika.lims import api
 from bika.lims import bikaMessageFactory as _, t
 from bika.lims import logger
 from bika.lims.browser import BrowserView
@@ -16,7 +17,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.Utils import formataddr
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
-from plone import api
 from plone.app.content.browser.interfaces import IFolderContentsView
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.utils import getToolByName
@@ -173,6 +173,26 @@ class AnalysisRequestPublishView(ARPV):
             '_ar_data': {}
         }
 
+    def publishFromPOST(self):
+        """The handler for the Publish button in the report preview page.
+        """
+        html = self.request.form.get('html')
+        style = self.request.form.get('style')
+        uids = self.request.form.get('uid').split(':')
+        template = self.request.form.get('template', '')
+        reporthtml = "<html><head>%s</head><body><div " \
+                     "id='report'>%s</body></html>" % (
+                         style, html)
+        publishedars = []
+        if 'multi_' in template.lower():
+            publishedars = self.publishFromHTML(
+                uids, safe_unicode(reporthtml).encode('utf-8'))
+        else:
+            for uid in uids:
+                ars = self.publishFromHTML(
+                    uid, safe_unicode(reporthtml).encode('utf-8'))
+                publishedars.extend(ars)
+        return publishedars
 
     def publishFromHTML(self, ar_uids, results_html):
         """ar_uids can be a single UID or a list of AR uids.  The resulting
@@ -183,13 +203,43 @@ class AnalysisRequestPublishView(ARPV):
         debug_mode = App.config.getConfiguration().debug_mode
         wf = getToolByName(self.context, 'portal_workflow')
 
-        coanr = self.request.form.get('coanr', None)
-
         # The AR can be published only and only if allowed
         uc = getToolByName(self.context, 'uid_catalog')
         ars = [p.getObject() for p in uc(UID=ar_uids)]
         if not ars:
             return []
+
+        ar = ars[0]
+        # Generate a ARReport only for the 1st AR (if multiple ARs have
+        # been selected)
+        reportid = ar.generateUniqueId('ARReport')
+        coanr = reportid
+        report = _createObjectByType("ARReport", ar, reportid)
+        report.edit(
+            AnalysisRequest=ar.UID(),
+            Html=results_html,
+            Recipients=self.get_arreport_recip_records(ar)
+        )
+        report.unmarkCreationFlag()
+        renameAfterCreation(report)
+
+        # Set blob properties for fields containing file data
+        fn = reportid
+        fld = report.getField('Pdf')
+        fld.get(report).setFilename(fn + ".pdf")
+        fld.get(report).setContentType('application/pdf')
+        fld = report.getField('CSV')
+        fld.get(report).setFilename(fn + ".csv")
+        fld.get(report).setContentType('text/csv')
+
+        # Modify the workflow state of each AR that's been published
+        status = wf.getInfoFor(ar, 'review_state')
+        transitions = {'verified': 'publish', 'published': 'republish'}
+        transition = transitions.get(status, 'prepublish')
+        try:
+            wf.doActionFor(ar, transition)
+        except WorkflowException:
+            pass
 
         # Create the pdf report for the supplied HTML.
         pdf_report = createPdf(results_html, False)
@@ -203,39 +253,22 @@ class AnalysisRequestPublishView(ARPV):
         # ALS hack.  Create the CSV they desire here now
         csvdata = self.create_als_csv(ars)
 
-        for ar in ars:
+        # set the pdf and csv data on the report
+        report.edit(
+            Pdf=pdf_report,
+            CSV=csvdata,
+        )
 
-            # Generate in each relevant AR, a new ARReport
-            reportid = ar.generateUniqueId('ARReport')
-            report = _createObjectByType("ARReport", ar, reportid)
-            report.edit(
-                AnalysisRequest=ar.UID(),
-                Pdf=pdf_report,
-                Html=results_html,
-                CSV=csvdata,
-                COANR=coanr,
-                Recipients=self.get_arreport_recip_records(ar)
-            )
-            report.unmarkCreationFlag()
-            renameAfterCreation(report)
-
-            # Set blob properties for fields containing file data
-            fn = coanr if coanr else '_'.join([ar.Title() for ar in ars])
-            fld = report.getField('Pdf')
-            fld.get(report).setFilename(fn + ".pdf")
-            fld.get(report).setContentType('application/pdf')
-            fld = report.getField('CSV')
-            fld.get(report).setFilename(fn + ".csv")
-            fld.get(report).setContentType('text/csv')
-
-            # Modify the workflow state of each AR that's been published
-            status = wf.getInfoFor(ar, 'review_state')
-            transitions = {'verified': 'publish', 'published': 'republish'}
-            transition = transitions.get(status, 'prepublish')
-            try:
-                wf.doActionFor(ar, transition)
-            except WorkflowException:
-                pass
+        if len(ars) > 1:
+            # create links in the other ars
+            for ar in ars[1:]:
+                linkid = ar.generateUniqueId('Link')
+                link = _createObjectByType("Link", ar, linkid)
+                link.edit(
+                    remoteUrl=report.absolute_url()
+                )
+                link.unmarkCreationFlag()
+                renameAfterCreation(link)
 
         # compose and send email.
         # The managers of the departments for which the current AR has
@@ -399,5 +432,3 @@ class AnalysisRequestPublishView(ARPV):
         retval = output.getvalue()
 
         return retval
-
-
