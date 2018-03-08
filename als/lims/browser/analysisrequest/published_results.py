@@ -2,7 +2,6 @@ from bika.lims import api
 from bika.lims.browser.analysisrequest.published_results import \
     AnalysisRequestPublishedResults as ARPR
 from bika.lims import bikaMessageFactory as _
-from bika.lims.utils import t
 from bika.lims.browser.bika_listing import BikaListingView
 from Products.CMFCore.utils import getToolByName
 from ZODB.POSException import POSKeyError
@@ -53,8 +52,8 @@ class AnalysisRequestPublishedResults(ARPR):
         workflow = getToolByName(ar, 'portal_workflow')
         # If is a retracted AR, show the link to child AR and show a warn msg
         if workflow.getInfoFor(ar, 'review_state') == 'invalid':
-            childar = hasattr(ar, 'getChildAnalysisRequest') \
-                        and ar.getChildAnalysisRequest() or None
+            childar = hasattr(ar, 'getChildAnalysisRequest') and \
+                ar.getChildAnalysisRequest() or None
             childid = childar and childar.getId() or None
             message = _('This Analysis Request has been withdrawn and is '
                         'shown for trace-ability purposes only. Retest: '
@@ -65,7 +64,7 @@ class AnalysisRequestPublishedResults(ARPR):
         # If is an AR automatically generated due to a Retraction, show it's
         # parent AR information
         if hasattr(ar, 'getParentAnalysisRequest') \
-            and ar.getParentAnalysisRequest():
+           and ar.getParentAnalysisRequest():
             par = ar.getParentAnalysisRequest()
             message = _('This Analysis Request has been '
                         'generated automatically due to '
@@ -120,7 +119,8 @@ class AnalysisRequestPublishedResults(ARPR):
 
         # Links to recipient profiles
         recipients = obj.getRecipients()
-        links = ["<a href='{Url}'>{Fullname}</a>".format(Fullname=r['Fullname'],
+        links = ["<a href='{Url}'>{Fullname}</a>".format(
+            Fullname=r['Fullname'],
             Url=api.get_url(api.get_object_by_uid(r['UID'])))
             for r in recipients if r['EmailAddress']]
         if len(links) == 0:
@@ -141,7 +141,7 @@ class AnalysisRequestPublishedResults(ARPR):
             pass
         item['DownloadPDF'] = ''
         item['after']['DownloadPDF'] = ', '.join(dll)
-        
+
         # download link 'Download CSV (size)'
         dll = []
         if hasattr(obj, 'CSV'):
