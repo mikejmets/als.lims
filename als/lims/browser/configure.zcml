@@ -10,14 +10,6 @@
             name="als-stickers"
     />
 
-  <browser:page
-      for="bika.lims.interfaces.IAnalysisRequest"
-      name="published_results"
-      class="bika.lims.browser.analysisrequest.AnalysisRequestPublishedResults"
-      permission="bika.lims.ManageAnalysisRequests"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
-
 <!--
 <plone:static
             directory="reports"
