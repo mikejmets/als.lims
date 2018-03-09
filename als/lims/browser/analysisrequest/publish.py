@@ -9,14 +9,13 @@ from bika.lims.browser import BrowserView
 from bika.lims.browser.analysisrequest.publish import \
     AnalysisRequestPublishView as ARPV
 from bika.lims.browser.analysisrequest.publish import \
-    AnalysisRequestDigester #as ARD
+    AnalysisRequestDigester  # as ARD
 from bika.lims.idserver import renameAfterCreation
 from bika.lims.utils import encode_header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.Utils import formataddr
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
-from plone import api
 from plone.app.content.browser.interfaces import IFolderContentsView
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.utils import getToolByName
@@ -35,6 +34,7 @@ from email.mime.base import MIMEBase
 from pkg_resources import resource_filename
 from weasyprint import HTML, CSS
 from zope.component.hooks import getSite
+
 
 def createPdf(htmlreport, outfile=None, css=None, images={}):
     """create a PDF from some HTML.
@@ -67,7 +67,6 @@ def createPdf(htmlreport, outfile=None, css=None, images={}):
         cssfile = open(_cssfile, 'r')
         css_def = cssfile.read()
 
-
     for (key, val) in images.items():
         htmlreport = htmlreport.replace(key, val)
 
@@ -87,6 +86,7 @@ def createPdf(htmlreport, outfile=None, css=None, images={}):
         os.remove(fn)
     return pdf_data
 
+
 def attachPdf(mimemultipart, pdfdata, filename=None):
     """Attach a PDF file to a mime multipart message
     """
@@ -98,16 +98,15 @@ def attachPdf(mimemultipart, pdfdata, filename=None):
     Encoders.encode_base64(part)
     mimemultipart.attach(part)
 
+
 def localize_images(html):
     """The PDF renderer will attempt to retrieve attachments directly from the
     URL referenced in the HTML report, which may refer back to a single-threaded
     (and currently occupied) zeoclient, hanging it.  All images hosted via
     URLs that refer to the Plone site, must be converted to local file paths.
-
-    This function modifies the URL of all images that can be resolved using 
+    This function modifies the URL of all images that can be resolved using
     traversal from the root of the Plone site (eg, Image or File fields).
     It also discovers images in 'bika' skins folder and modifies their URLs.
-    
     Other images may need to be handled manually.
 
     Returns a list of files which were created, and a modified copy
@@ -172,7 +171,6 @@ class AnalysisRequestPublishView(ARPV):
             '_qcanalyses_data': {},
             '_ar_data': {}
         }
-
 
     def publishFromHTML(self, ar_uids, results_html):
         """ar_uids can be a single UID or a list of AR uids.  The resulting
@@ -399,5 +397,3 @@ class AnalysisRequestPublishView(ARPV):
         retval = output.getvalue()
 
         return retval
-
-
