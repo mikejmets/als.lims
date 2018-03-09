@@ -1,4 +1,5 @@
 from bika.lims import api
+from plone import api as ploneapi
 from bika.lims.browser.analysisrequest.published_results import \
     AnalysisRequestPublishedResults as ARPR
 from bika.lims import bikaMessageFactory as _
@@ -14,8 +15,8 @@ class AnalysisRequestPublishedResults(ARPR):
         self.context = context
         self.request = request
 
-        self.catalog = "bika_catalog"
-        self.contentFilter = {'portal_type': 'ARReport',
+        self.catalog = "portal_catalog"
+        self.contentFilter = {'portal_type': 'Link',
                               'sort_order': 'reverse'}
         self.context_actions = {}
         self.show_select_column = True
@@ -25,7 +26,7 @@ class AnalysisRequestPublishedResults(ARPR):
             self.portal_url)
         self.title = self.context.translate(_("Published results"))
         self.columns = {
-            'COAID': {'title': _('COA ID')},
+            'COANR': {'title': _('COA NR')},
             'Date': {'title': _('Date')},
             'PublishedBy': {'title': _('Published By')},
             'Recipients': {'title': _('Recipients')},
@@ -37,7 +38,7 @@ class AnalysisRequestPublishedResults(ARPR):
              'title': 'All',
              'contentFilter': {},
              'columns': [
-                 'COAID',
+                 'COANR',
                  'Date',
                  'PublishedBy',
                  'Recipients',
@@ -94,7 +95,7 @@ class AnalysisRequestPublishedResults(ARPR):
 
     def contentsMethod(self, contentFilter):
         """
-        ARReport objects associated to the current Analysis request.
+        ARReport (or Link) objects associated to the current Analysis request.
         If the user is not a Manager or LabManager or Client, no items are
         displayed.
         """
@@ -103,12 +104,17 @@ class AnalysisRequestPublishedResults(ARPR):
         member = pm.getAuthenticatedMember()
         roles = member.getRoles()
         allowed = [a for a in allowedroles if a in roles]
-        return self.context.objectValues('ARReport') if allowed else []
+        brains = ploneapi.content.find(context=self.context,
+            portal_type=['ARReport','Link']) if allowed else []
+        return [x.getObject() for x in brains]
 
     def folderitem(self, obj, item, index):
 
-        ar = obj.aq_parent
-        item['COAID'] = ar.id
+        if obj.portal_type == 'Link':
+            # Grab the report object that the link points to
+            obj = api.get_object_by_path(obj.remoteUrl)
+
+        item['COANR'] = obj.id
 
         item['PublishedBy'] = self.user_fullname(obj.Creator())
 
