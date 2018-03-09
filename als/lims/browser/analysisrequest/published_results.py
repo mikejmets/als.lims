@@ -11,19 +11,15 @@ from ZODB.POSException import POSKeyError
 class AnalysisRequestPublishedResults(ARPR):
 
     def __init__(self, context, request):
-        BikaListingView.__init__(self, context, request)
-        self.context = context
-        self.request = request
-
+        super(AnalysisRequestPublishedResults, self).__init__(context, request)
         self.catalog = "portal_catalog"
-        self.contentFilter = {'portal_type': 'Link',
+        self.contentFilter = {'portal_type': ['ARReport', 'Link'],
                               'sort_order': 'reverse'}
         self.context_actions = {}
         self.show_select_column = True
         self.show_workflow_action_buttons = False
         self.form_id = 'published_results'
-        self.icon = "{}//++resource++bika.lims.images/report_big.png".format(
-            self.portal_url)
+        self.icon = self.portal_url + "/++resource++bika.lims.images/report_big.png"
         self.title = self.context.translate(_("Published results"))
         self.columns = {
             'COANR': {'title': _('COA NR')},
@@ -104,8 +100,9 @@ class AnalysisRequestPublishedResults(ARPR):
         member = pm.getAuthenticatedMember()
         roles = member.getRoles()
         allowed = [a for a in allowedroles if a in roles]
-        brains = ploneapi.content.find(context=self.context,
-            portal_type=['ARReport','Link']) if allowed else []
+        brains = ploneapi.content.find(
+            context=self.context,
+            portal_type=['ARReport', 'Link']) if allowed else []
         return [x.getObject() for x in brains]
 
     def folderitem(self, obj, item, index):
