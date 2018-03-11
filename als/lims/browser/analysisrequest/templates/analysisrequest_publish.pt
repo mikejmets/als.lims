@@ -62,7 +62,7 @@
                 <span tal:content="python:view.getAnalysisRequestsCount()"></span>&nbsp;
                 <span i18n:translate=""> analysis requests selected</span>:&nbsp;
                 <tal:ars repeat="ar python:view.getAnalysisRequests()">
-                    <a tal:attributes="href ar/absolute_url" tal:content="python: ar.id"/>&nbsp;
+                    <a tal:attributes="href python:'#'+ar.id" tal:content="python: ar.id"></a>&nbsp;
                 </tal:ars>
             </div>
             <div id='ar_publish_buttons'>
@@ -83,7 +83,6 @@
             }
             div.ar_publish_page {
                 border: 1px dashed #cdcdcd;
-                margin-top:5px;
             }
             #ar_publish_container {
                 margin:0 auto;
@@ -178,6 +177,14 @@
                 color: red;
                 padding: 5px;
             }
+            .barcode-hri {
+                clear:both;
+                width: 100%;
+                background-color: #FFFFFF;
+                color: #000000;
+                text-align: center;
+                font-size: 10px;
+            }
         </style>
         <style id='report-style' tal:content='structure python:view.getReportStyle()'></style>
         <style id='layout-style'></style>
@@ -189,7 +196,6 @@
                 }
                 div.ar_publish_page {
                     border: none;
-                    margin-top:0;
                 }
                 html {
                     background-color:#fff !important;
@@ -233,37 +239,39 @@
         </style>
 
         <div id='report'>
-            <tal:singlearreport condition="python:view.isSingleARTemplate()">
-            <!-- Single-AR template.
-              The templates from this type will render one AR at a time, so one
-              report per AR will be generated.
-            -->
-            <tal:ar tal:repeat="i python:range(view.getAnalysisRequestsCount())">
-            <div tal:attributes="id python:view.getAnalysisRequestObj().id;
-                                uid python:view.getAnalysisRequestObj().UID();
-                                class python:('ar_publish_body singlear %s' % ('ar-invalid' if view.getAnalysisRequestObj().isInvalid() else ('ar-provisional' if view.getAnalysisRequest()['prepublish']==True else '')))"
-                tal:content='structure python:view.getReportTemplate()'></div>
-            </tal:ar>
-            </tal:singlearreport>
 
-            <tal:multiarreport condition="python:not view.isSingleARTemplate()">
-            <!--
-              Multi-AR template. ARs grouped by client.
-              The templates from this type must be able to render multiples ARs, so
-              each report will contain a bunch of ARs from the same client
-            -->
-            <tal:argroup repeat="i python:range(view.getGroupedAnalysisRequestsCount())">
-            <tal:multiar define="ids python:':'.join([ar.id for ar in view.getAnalysisRequestGroup()]);
-                                uids python:':'.join([ar.UID() for ar in view.getAnalysisRequestGroup()]);
-                                inv  python:len([ar.isInvalid() for ar in view.getAnalysisRequestGroup() if ar.isInvalid()]) > 0;">
-            <div tal:content="structure python:view.getGroupedReportTemplate()"
-                 tal:attributes="id ids;
-                                uid uids;
-                                class python:'ar_publish_body multiar %s' % ('ar-invalid' if inv else '');"></div>
-            </tal:multiar>
-            </tal:argroup>
-            </tal:multiarreport>
+        <tal:singlearreport condition="python:view.isSingleARTemplate()">
+        <!-- Single-AR template.
+          The templates from this type will render one AR at a time, so one
+          report per AR will be generated.
+        -->
+        <tal:ar tal:repeat="i python:range(view.getAnalysisRequestsCount())">
+        <div tal:attributes="id python:view.getAnalysisRequestObj().id;
+                            uid python:view.getAnalysisRequestObj().UID();
+                            class python:('ar_publish_body singlear %s' % ('ar-invalid' if hasattr(view.getAnalysisRequestObj(),'isInvalid') and view.getAnalysisRequestObj().isInvalid() else ('ar-provisional' if view.getAnalysisRequest()['prepublish']==True else '')))"
+            tal:content='structure python:view.getReportTemplate()'></div>
+        </tal:ar>
+        </tal:singlearreport>
+
+        <tal:multiarreport condition="python:not view.isSingleARTemplate()">
+        <!--
+          Multi-AR template. ARs grouped by client.
+          The templates from this type must be able to render multiples ARs, so
+          each report will contain a bunch of ARs from the same client
+        -->
+        <tal:argroup repeat="i python:range(view.getGroupedAnalysisRequestsCount())">
+        <tal:multiar define="ids python:':'.join([ar.id for ar in view.getAnalysisRequestGroup()]);
+                            uids python:':'.join([ar.UID() for ar in view.getAnalysisRequestGroup()]);
+                            inv  python:len([hasattr(ar,'isInvalid') and ar.isInvalid() for ar in view.getAnalysisRequestGroup() if hasattr(ar,'isInvalid') and ar.isInvalid()]) > 0;">
+        <div tal:content="structure python:view.getGroupedReportTemplate()"
+             tal:attributes="id ids;
+                            uid uids;
+                            class python:'ar_publish_body multiar %s' % ('ar-invalid' if inv else '');"></div>
+        </tal:multiar>
+        </tal:argroup>
+        </tal:multiarreport>
         </div>
     </div>
+    <div id="my_mm" style="height:1mm;display:none"></div>
 </body>
 </html>
