@@ -4,7 +4,8 @@ from bika.lims.browser.analysisrequest.published_results import \
     AnalysisRequestPublishedResults as ARPR
 from bika.lims import bikaMessageFactory as _
 from bika.lims.browser.bika_listing import BikaListingView
-from Products.CMFCore.utils import getToolByName, safe_unicode
+from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone.utils import safe_unicode
 from ZODB.POSException import POSKeyError
 
 
