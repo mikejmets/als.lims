@@ -4,7 +4,7 @@ from bika.lims.browser.analysisrequest.published_results import \
     AnalysisRequestPublishedResults as ARPR
 from bika.lims import bikaMessageFactory as _
 from bika.lims.browser.bika_listing import BikaListingView
-from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.utils import getToolByName, safe_unicode
 from ZODB.POSException import POSKeyError
 
 
@@ -14,6 +14,8 @@ class AnalysisRequestPublishedResults(ARPR):
         super(AnalysisRequestPublishedResults, self).__init__(context, request)
         self.catalog = "portal_catalog"
         self.contentFilter = {'portal_type': ['ARReport', 'Link'],
+                              'path': {'query': api.get_path(self.context),
+                                       'depth': 1},
                               'sort_order': 'reverse'}
         self.context_actions = {}
         self.show_select_column = True
