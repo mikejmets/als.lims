@@ -259,8 +259,15 @@ class AnalysisRequestPublishView(ARPV):
         )
 
         if len(ars) > 1:
-            # create links in the other ars
+            # publish and create links in the other ars
             for ar in ars[1:]:
+                # Publish AR
+                try:
+                    wf.doActionFor(ar, transition)
+                except WorkflowException:
+                    pass
+
+                # Link to first ARReport
                 linkid = ar.generateUniqueId('Link')
                 link = _createObjectByType("Link", ar, linkid)
                 link.edit(
