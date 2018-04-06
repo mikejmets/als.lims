@@ -65,7 +65,6 @@
 
   <!-- Address and Lab info -->
   <div id="section-info">
-      <!-- This is required -->
     <div id="accreditation-logo"
          tal:condition="python:laboratory['accredited']==True">
       <img tal:condition="laboratory/accreditation_logo"
@@ -77,7 +76,7 @@
       <tr>
         <td id="client-info">
           <table>
-            <tr tal:condition="python:contact.get('fullname','') != ''"><td id="client-contact" tal:content="contact/fullname"></td></tr>
+                    <tr tal:condition="python:contact.get('fullname','') != ''"><td id="client-contact" tal:content="python:contact.get('fullname','')"></td></tr>
             <tr><td id="client-name" tal:content="client/name"></td></tr>
             <tr><td id="client-address" tal:content="structure client/address"></td></tr>
             <tr tal:condition="python:contact.get('email','') != ''">
@@ -109,6 +108,11 @@
               <td id="lab-URL">
                 <a tal:attributes="href laboratory/url"
                    tal:content="laboratory/url"></a>
+              </td>
+            </tr>
+            <tr tal:condition="laboratory/supervisor">
+              <td id="lab-supervisor">
+                <a tal:content="python:'Supervisor: ' + laboratory.get('supervisor')"></a>
               </td>
             </tr>
           </table>
@@ -226,7 +230,7 @@
             <tr>
               <td tal:attributes="colspan python:6 if hasprevresults else 5">
                 <div class='category_comments'
-                     tal:define="category python:categanalyses[poc][cat][0]['obj'].getService().getCategory();
+                         tal:define="category python:categanalyses[poc][cat][0]['obj'].getCategory();
                             catcomm  python:category.getComments() if hasattr(category, 'getComments') else '';"
                      tal:condition="catcomm"
                      tal:content="catcomm"></div>
@@ -389,7 +393,7 @@
         <span class="file-size" tal:content="attachment/size">145Kb</span>
       </tal:attach>
     </div>
-    <tal:ar_attachments>
+    </tal:ar_attachments>
 
     <!-- AN Attachments -->
     <h2 i18n:translate="" tal:condition="an_attachments">Analysis services attachments</h2>

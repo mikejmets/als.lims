@@ -14,13 +14,14 @@
                   portal portal_state/portal;">
 <head>
     <div tal:replace="structure provider:plone.resourceregistries.scripts" />
+    <script type="text/javascript" src="++resource++als.lims.js/bika.lims.analysisrequest.publish.js"></script>
 </head>
 <body class="A4" data-layout="A4">
     <div id='ar_publish_container'>
         <div id="ar_publish_header" tal:condition="python:view.showOptions()">
             <div id='options_handler'>
                 <div class='options-line'>
-                    <label for="sel_format" i18n:translate="">Template</label>
+                    <label for="sel_format" i18n:translate="">Templatessss</label>
                     <select id="sel_format" name="sel_format">
                         <tal:formats tal:repeat="format python:view.getAvailableFormats()">
                             <tal:format define="current python:request.get('template', view._DEFAULT_TEMPLATE);">

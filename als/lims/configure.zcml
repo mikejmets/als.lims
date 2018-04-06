@@ -17,6 +17,12 @@
 
   <cmf:registerDirectory name="skins" directory="skins" recursive="True" />
 
+  <browser:resourceDirectory
+    name="als.lims"
+    directory="static" />
+  <i18n:registerTranslations directory="locales"/>
+
+
   <include package="z3c.jbot" file="meta.zcml" />
   <browser:jbot directory="jbot" />
 

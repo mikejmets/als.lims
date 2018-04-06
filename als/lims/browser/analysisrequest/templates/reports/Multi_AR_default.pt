@@ -8,11 +8,11 @@
                           coanr            python:view.next_certificate_number();
                           firstar          python:arspage[0][0];
                           analysisrequest  python:view.getAnalysisRequest(firstar);
-                          portal           python:view.context.portal_url.getPortalObject();
-                          client           python:analysisrequest['obj'].aq_parent;
+                          portal           analysisrequest/portal;
+                          client           python:analysisrequest['client']['obj'];
                           batch            python:analysisrequest['obj'].getBatch();
                           contact          python:analysisrequest['obj'].getContact();
-                          lab              python:portal.bika_setup.laboratory;
+                          lab              python:portal['obj'].bika_setup.laboratory;
                           acc_logo         python:lab.getAccreditationBodyLogo();">
 
     <div id="section-info">
@@ -50,7 +50,7 @@
               </tr>
               <tr>
                 <th i18n:translate="" class="label">Address</th>
-                <td tal:content="structure python:view._client_address(client)"/>
+                <td tal:content="structure python:view._client_data(firstar)['address']"/>
               </tr>
             </table>
           </td>
@@ -124,7 +124,7 @@
           Methods included in the
           <tal:block replace="python:lab.getAccreditationBody()" i18n:name="accreditation_body"/>
           schedule of Accreditation for this Laboratory are marked with
-          <img tal:attributes='src python:portal.absolute_url()+"/++resource++bika.lims.images/accredited.png";' class="accredited-ico"/>
+          <img tal:attributes='src python:portal["url"]+"/++resource++bika.lims.images/accredited.png";' class="accredited-ico"/>
         </div>
         <div tal:condition="python:lab.getLaboratoryAccredited()" i18n:translate="">
           Analysis remarks are not accredited.
@@ -144,7 +144,7 @@
               <tr>
                 <td width="100%">
                   <a tal:attributes="href python: lab.getLabURL()">
-                    <img tal:attributes="src python:portal.absolute_url() + '/logo_print.png'"/>
+                    <img tal:attributes="src python:portal['obj'].absolute_url() + '/logo_print.png'"/>
                   </a>
                 </td>
                 <td style="text-align:right !important;">

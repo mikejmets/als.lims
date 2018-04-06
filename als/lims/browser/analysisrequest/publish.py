@@ -6,6 +6,7 @@ import tempfile
 from bika.lims import bikaMessageFactory as _, t
 from bika.lims import logger
 from bika.lims.browser import BrowserView
+from DateTime import DateTime
 from bika.lims.browser.analysisrequest.publish import \
     AnalysisRequestPublishView as ARPV
 from bika.lims.browser.analysisrequest.publish import \
@@ -23,6 +24,7 @@ from Products.CMFPlone.utils import _createObjectByType, safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from zope.interface import implements
 
+from als.lims.vocabularies import getALSARReportTemplates
 # attachPdf, createPdf in bika.als were different to that found in senaite.core
 # using the versions sourced from bika.als
 
@@ -34,6 +36,9 @@ from email.mime.base import MIMEBase
 from pkg_resources import resource_filename
 from weasyprint import HTML, CSS
 from zope.component.hooks import getSite
+import traceback
+from plone.resource.utils import queryResourceDirectory
+from bika.lims.interfaces import IAnalysisRequest
 
 
 def createPdf(htmlreport, outfile=None, css=None, images={}):
@@ -171,6 +176,111 @@ class AnalysisRequestPublishView(ARPV):
             '_qcanalyses_data': {},
             '_ar_data': {}
         }
+
+    def __call__(self):
+        if self.context.portal_type == 'AnalysisRequest':
+            self._ars = [self.context]
+        elif self.context.portal_type in ('AnalysisRequestsFolder', 'Client') \
+                and self.request.get('items', ''):
+            uids = self.request.get('items').split(',')
+            uc = getToolByName(self.context, 'uid_catalog')
+            self._ars = [obj.getObject() for obj in uc(UID=uids)]
+        else:
+            # Do nothing
+            self.destination_url = self.request.get_header(
+                "referer", self.context.absolute_url())
+
+        # Group ARs by client
+        groups = {}
+        for ar in self._ars:
+            idclient = ar.aq_parent.id
+            if idclient not in groups:
+                groups[idclient] = [ar]
+            else:
+                groups[idclient].append(ar)
+        self._arsbyclient = [group for group in groups.values()]
+
+        # Report may want to print current date
+        self.current_date = self.ulocalized_time(DateTime(), long_format=True)
+
+        # Do publish?
+        if self.request.form.get('publish', '0') == '1':
+            self.publishFromPOST()
+        else:
+            return self.template()
+
+    def getAvailableFormats(self):
+        """Returns the available formats found in templates/reports
+        """
+        return getALSARReportTemplates()
+
+    def _renderTemplate(self):
+        """Returns the html template to be rendered in accordance with the
+        template specified in the request ('template' parameter)
+        """
+        templates_dir = 'templates/reports'
+        embedt = self.request.form.get('template', self._DEFAULT_TEMPLATE)
+        if embedt.find(':') >= 0:
+            prefix, template = embedt.split(':')
+            templates_dir = queryResourceDirectory('reports', prefix).directory
+            embedt = template
+        embed = ViewPageTemplateFile(os.path.join(templates_dir, embedt))
+        return embedt, embed(self)
+
+    def getReportTemplate(self):
+        """Returns the html template for the current ar and moves to
+        the next ar to be processed. Uses the selected template
+        specified in the request ('template' parameter)
+        """
+        embedt = ""
+        try:
+            embedt, reptemplate = self._renderTemplate()
+        except:
+            tbex = traceback.format_exc()
+            arid = self._ars[self._current_ar_index].id
+            reptemplate = \
+                "<div class='error-report'>%s - %s '%s':<pre>%s</pre></div>" \
+                % (arid, _("Unable to load the template"), embedt, tbex)
+        self._nextAnalysisRequest()
+        return reptemplate
+
+    def getGroupedReportTemplate(self):
+        """Returns the html template for the current group of ARs and moves to
+        the next group to be processed. Uses the selected template
+        specified in the request ('template' parameter)
+        """
+        embedt = ""
+        try:
+            embedt, reptemplate = self._renderTemplate()
+        except:
+            tbex = traceback.format_exc()
+            reptemplate = \
+                "<div class='error-report'>%s '%s':<pre>%s</pre></div>" \
+                % (_("Unable to load the template"), embedt, tbex)
+        self._nextAnalysisRequestGroup()
+        return reptemplate
+
+    def getReportStyle(self):
+        """Returns the css style to be used for the current template.
+        If the selected template is 'default.pt', this method will
+        return the content from 'default.css'. If no css file found
+        for the current template, returns empty string
+        """
+        template = self.request.form.get('template', self._DEFAULT_TEMPLATE)
+        content = ''
+        if template.find(':') >= 0:
+            prefix, template = template.split(':')
+            resource = queryResourceDirectory('reports', prefix)
+            css = '{0}.css'.format(template[:-3])
+            if css in resource.listDirectory():
+                content = resource.readFile(css)
+        else:
+            this_dir = os.path.dirname(os.path.abspath(__file__))
+            templates_dir = os.path.join(this_dir, 'templates/reports/')
+            path = '%s/%s.css' % (templates_dir, template[:-3])
+            with open(path, 'r') as content_file:
+                content = content_file.read()
+        return content
 
     def publishFromPOST(self):
         """The handler for the Publish button in the report preview page.
@@ -438,3 +548,106 @@ class AnalysisRequestPublishView(ARPV):
         retval = output.getvalue()
 
         return retval
+
+    def _lab_address(self, lab):
+        lab_address = lab.getPostalAddress() \
+                      or lab.getBillingAddress() \
+                      or lab.getPhysicalAddress()
+        return _format_address(lab_address)
+
+    def _client_data(self, ar):
+        data = {}
+        client = ar.aq_parent
+        if client:
+            data['obj'] = client
+            data['id'] = client.id
+            data['url'] = client.absolute_url()
+            data['name'] = to_utf8(client.getName())
+            data['phone'] = to_utf8(client.getPhone())
+            data['fax'] = to_utf8(client.getFax())
+
+            data['address'] = to_utf8(get_client_address(ar))
+        return data
+
+    def getAnalysisBasedTransposedMatrix(self, ars):
+        """ Returns a dict with the following structure:
+            {'category_1_name':
+                {'service_1_title':
+                    {'service_1_uid':
+                        {'service': <AnalysisService-1>,
+                         'ars': {'ar1_id': [<Analysis (for as-1)>,
+                                           <Analysis (for as-1)>],
+                                 'ar2_id': [<Analysis (for as-1)>]
+                                },
+                        },
+                    },
+                {'service_2_title':
+                     {'service_2_uid':
+                        {'service': <AnalysisService-2>,
+                         'ars': {'ar1_id': [<Analysis (for as-2)>,
+                                           <Analysis (for as-2)>],
+                                 'ar2_id': [<Analysis (for as-2)>]
+                                },
+                        },
+                    },
+                ...
+                },
+            }
+        """
+        analyses = {}
+        for ar in ars:
+            ans = [an.getObject() for an in ar.getAnalyses()]
+            for an in ans:
+                service = an.getService()
+                cat = service.getCategoryTitle()
+                if cat not in analyses:
+                    analyses[cat] = {
+                        service.title: {
+                            'service': service,
+                            'accredited': service.getAccredited(),
+                            'ars': {ar.id: an.getFormattedResult()}
+                        }
+                    }
+                elif service.title not in analyses[cat]:
+                    analyses[cat][service.title] = {
+                        'service': service,
+                        'accredited': service.getAccredited(),
+                        'ars': {ar.id: an.getFormattedResult()}
+                    }
+                else:
+                    d = analyses[cat][service.title]
+                    d['ars'][ar.id] = an.getFormattedResult()
+                    analyses[cat][service.title] = d
+        return analyses
+
+
+def get_client_address(context):
+    if context.portal_type == 'AnalysisRequest':
+        client = context.aq_parent
+    else:
+        client = context
+    client_address = client.getPostalAddress()
+    if not client_address:
+        ar = context
+        if not IAnalysisRequest.providedBy(ar):
+            return ""
+        # Data from the first contact
+        contact = ar.getContact()
+        if contact and contact.getBillingAddress():
+            client_address = contact.getBillingAddress()
+        elif contact and contact.getPhysicalAddress():
+            client_address = contact.getPhysicalAddress()
+    return _format_address(client_address)
+
+
+def _format_address(address):
+    """Takes a value from an AddressField, returns a div class=address
+    with spans inside, containing the address field values.
+    """
+    addr = ''
+    if address:
+        # order of divs in output html
+        keys = ['address', 'city', 'district', 'state', 'zip', 'country']
+        addr = ''.join(["<div>%s</div>" % address.get(v) for v in keys
+                        if address.get(v, None)])
+    return "<div class='address'>%s</div>" % addr
