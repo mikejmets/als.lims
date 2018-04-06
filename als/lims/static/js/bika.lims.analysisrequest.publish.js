@@ -27,7 +27,6 @@
   };
 
   window.AnalysisRequestPublishView = function() {
-      alert('css');
     var applyMargin, convert_svgs, default_margins, getPaperSize, load_barcodes, load_layout, papersize_default, papersizes, referrer_cookie_name, reloadReport, that;
     that = this;
     referrer_cookie_name = '_arpv';
