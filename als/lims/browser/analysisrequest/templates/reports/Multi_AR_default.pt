@@ -144,7 +144,7 @@
               <tr>
                 <td width="100%">
                   <a tal:attributes="href python: lab.getLabURL()">
-                    <img tal:attributes="src python:portal['obj'].absolute_url() + '/logo_print.png'"/>
+                    <img tal:attributes="src python:portal['url'] + '/logo_print.png'"/>
                   </a>
                 </td>
                 <td style="text-align:right !important;">
@@ -278,9 +278,7 @@
                 <span class="td service_title"
                       tal:attributes="style string:width:${servicecol_width}%">
                   <span tal:content="service_title"/>
-                  <img tal:attributes='src python:portal.absolute_url()+"/++resource++bika.lims.images/accredited.png";'
-                       tal:condition="accredited"
-                       class="accredited-ico"/>
+                  <img tal:attributes='src python:portal["url"]+"/++resource++bika.lims.images/accredited.png";' class="accredited-ico"/>
                 </span>
                 <span class="td method_title"
                       tal:attributes="style string:width:${methodcol_width}%"
