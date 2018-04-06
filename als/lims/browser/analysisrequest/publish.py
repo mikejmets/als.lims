@@ -12,12 +12,14 @@ from bika.lims.browser.analysisrequest.publish import \
 from bika.lims.browser.analysisrequest.publish import \
     AnalysisRequestDigester  # as ARD
 from bika.lims.idserver import renameAfterCreation
+from bika.lims.interfaces import IAnalysisRequest
 from bika.lims.utils import encode_header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.Utils import formataddr
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 from plone.app.content.browser.interfaces import IFolderContentsView
+from plone.resource.utils import queryResourceDirectory
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import _createObjectByType, safe_unicode
@@ -30,15 +32,13 @@ from als.lims.vocabularies import getALSARReportTemplates
 
 import re
 import urllib2
+import traceback
 from bika.lims.utils import tmpID, to_utf8
 from email import Encoders
 from email.mime.base import MIMEBase
 from pkg_resources import resource_filename
 from weasyprint import HTML, CSS
 from zope.component.hooks import getSite
-import traceback
-from plone.resource.utils import queryResourceDirectory
-from bika.lims.interfaces import IAnalysisRequest
 
 
 def createPdf(htmlreport, outfile=None, css=None, images={}):
