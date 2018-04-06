@@ -1,0 +1,222 @@
+/* IMPORTANT NOTE
+ * Do not use margins, use padding instead
+ */
+
+#report {
+    font: 8pt Arial, Verdana, serif !important;
+    width: 100% !important;
+}
+
+#report h1 {
+    font-size:1.4em;
+    font-weight:bold;
+    /* Center the heading text */
+    margin: 0 auto;
+}
+
+#report h2 {
+    font-size:1.2em;
+    font-weight:bold;
+    padding-bottom:5px !important;
+}
+
+#report h3 {
+    font-size:1.1em;
+    font-weight:bold;
+    padding-bottom:5px !important;
+}
+
+.page-header {
+    height: 76px;
+}
+
+#section-info {
+    line-height:125% !important;
+}
+
+#section-info div {
+  padding:5px;
+}
+
+#section-info-heading {
+    height:2em;
+    text-align:center !important;
+    vertical-align:middle;
+}
+
+#section-address-heading {
+    width:100%
+}
+
+#section-address-heading > .client-address {
+    width:60%
+}
+
+#section-address-heading > .lab-address {
+    width:40%
+}
+
+#discreeter div{
+  padding-top:3px;
+  line-height: 125% !important;
+}
+
+#discreeter-info {
+    color:#555;
+}
+
+.accredited-ico {
+    height:1.1em;
+    vertical-align:middle;
+}
+
+.to_follow-ico {
+    height:1.1em;
+    vertical-align:middle;
+}
+
+#report #lab-logo {
+  margin-bottom:4px !important;
+}
+
+#report .label {
+    font-weight:bold;
+    padding-right: 10px;
+    text-align: left;
+    vertical-align: top;
+}
+#report .outofrange,
+#report .outofrange a {
+    font-weight:bold;
+    color:#d40000;
+}
+
+#report .first-page-footer table {
+    padding: 5px 0;
+    width: 100%;
+}
+#report .page-footer table {
+    border-top: 1px solid #aaaaaa;
+    padding: 5px 0;
+    width: 100%;
+}
+
+.ar_table {
+    font-size: 6pt;
+    border-top:1px solid #cdcdcd;
+    border-left:1px solid #cdcdcd;
+}
+.header_th {
+    font-weight:bold;
+    padding: 1px;
+    /* each column adds some border pixels, but the header column has no
+       borders and must compensate here
+    */
+    padding-right:8px !important;
+}
+.header_td {
+    text-align: center;
+    padding:1px;
+}
+
+.result{
+    text-align:center;
+}
+
+.unit,
+.unit sub,
+.unit sup {
+    color:#333;
+    font-weight:normal !important;
+    font-style:italic !important;
+    font-size:6pt;
+}
+
+.ldl {
+    color:#333;
+    font-weight:normal !important;
+    font-style:italic !important;
+    font-size:6pt;
+}
+
+.cat_title {
+    color: #333333;
+    padding:2px 0px 2px 0px;
+    font-weight: bold;
+    width:100% !important;
+    border:0 !important;
+}
+
+.signatories_header {
+    color: #333333;
+    padding:2px;
+    font-weight: bold;
+    font-size:1.2em;
+    width:100% !important;
+}
+
+.signatories_discreeter {
+    padding:2px;
+    line-height: 110% !important;
+    color:#333;
+    font-size:82%;
+}
+
+table.signatories {
+    font-size: 1.2em;
+    border: 1px solid #cdcdcd;
+}
+table.signatories th {
+    border-bottom: 1px solid #cdcdcd;
+    text-align:left;
+    font-size: .9em;
+}
+
+div.resultsinterpretation {
+    border: none !important;
+    border-top: 10px solid #ffffff;
+}
+
+div.resultsinterpretation_heading {
+    background: #cdcdcd;
+    color: #333333;
+    padding:2px 0px 2px 0px;
+    font-weight:bold;
+    border-bottom:1px solid #cdcdcd;
+}
+
+div.resultsinterpretation_dept_heading {
+    background: #ffffff;
+    color: #333333;
+    padding:2px 0px 2px 0px;
+    font-weight:bold;
+    border:1px solid #cdcdcd;
+}
+
+/* this is to reproduce table-like structure
+   for the sake of table-less layout. */
+.table { display:table; table-layout:fixed; width:100%; }
+.row { display:table-row; width:100%; }
+
+.th {
+    display:table-cell;
+    font-weight:bold;
+    background: #eeeeee;
+    color: #444444;
+    padding:1px;
+    border-bottom:1px solid #cdcdcd;
+    border-right:1px solid #cdcdcd;
+}
+.th.result { text-align:center; }
+.td {
+    display:table-cell;
+    padding:1px;
+    border-bottom:1px solid #cdcdcd;
+    border-right:1px solid #cdcdcd;
+}
+/* this is where the colspan tricks works. */
+/* below is for visual recognition test purposes only. */
+.red { background:red; }
+.blue { background:blue; }
+.green { background:green; }
+.black { background:black; }
