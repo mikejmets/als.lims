@@ -150,7 +150,7 @@
                 <td style="text-align:right !important;">
                   <img tal:condition="acc_logo"
                        style="height:35px;"
-                       tal:attributes="src python:acc_logo.absolute_url()"/>
+                       tal:attributes="src python:portal['url'] +'/'+ acc_logo.absolute_url()"/>
                 </td>
               </tr>
             </table>
