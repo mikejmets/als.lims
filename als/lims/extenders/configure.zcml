@@ -15,4 +15,6 @@
 
     <adapter name='als.lims' factory=".arreport.ARReportSchemaExtender" />
 
+    <adapter name='als.lims' factory=".arimport.ARImportSchemaModifier" />
+
 </configure>

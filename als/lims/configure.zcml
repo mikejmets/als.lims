@@ -37,5 +37,6 @@
   <include package=".subscribers"/>
   <include package=".workflow"/>
   <include package=".viewlets"/>
+  <include package=".monkey"/>
 
 </configure>
