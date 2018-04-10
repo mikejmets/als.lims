@@ -22,5 +22,11 @@
       replacement="als.lims.monkey.monkey_arimport.workflow_script_import"
       />
 
+  <monkey:patch
+      description="This modifies the workflow_script_import method"
+      class="bika.lims.adapters.widgetvisibility.SamplingWorkflowWidgetVisibility"
+      original="__call__"
+      replacement="als.lims.monkey.monkey_sampler_widgetvisibility.__call__"
+      />
 
 </configure>
