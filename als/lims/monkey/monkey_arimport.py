@@ -5,19 +5,17 @@
 # Copyright 2011-2017 by it's authors.
 # Some rights reserved. See LICENSE.txt, AUTHORS.txt.
 
-# import transaction
+import transaction
 from bika.lims.content.analysisrequest import schema as ar_schema
 from bika.lims.content.sample import schema as sample_schema
+from bika.lims.utils import getUsers
+from bika.lims.utils.analysisrequest import create_analysisrequest
+from Products.Archetypes.utils import addStatusMessage
 from Products.CMFCore.utils import getToolByName
 from zope.i18nmessageid import MessageFactory
-from bika.lims.utils import getUsers
 
 from plone import api as ploneapi
-# from bika.lims import logger
 
-# from Products.Archetypes.utils import addStatusMessage
-
-from bika.lims.utils.analysisrequest import create_analysisrequest
 from copy import deepcopy
 from bika.lims import bikaMessageFactory as _
 from collective.progressbar.events import InitialiseProgressBar
@@ -28,6 +26,44 @@ from zope.event import notify
 
 
 _p = MessageFactory(u"plone")
+
+
+def workflow_before_validate(self):
+    """This function transposes values from the provided file into the
+    ARImport object's fields, and checks for invalid values.
+
+    If errors are found:
+        - Validation transition is aborted.
+        - Errors are stored on object and displayed to user.
+
+    """
+    # Re-set the errors on this ARImport each time validation is attempted.
+    # When errors are detected they are immediately appended to this field.
+    self.setErrors([])
+
+    def item_empty(gridrow, key):
+        if not gridrow.get(key, False):
+            return True
+        return len(gridrow[key]) == 0
+
+    row_nr = 0
+    for gridrow in self.getSampleData():
+        row_nr += 1
+        if item_empty(gridrow, 'Sampler'):
+            self.error("Row %s: %s is required" % (row_nr, 'Sampler'))
+
+    self.validate_headers()
+    self.validate_samples()
+
+    if self.getErrors():
+        addStatusMessage(self.REQUEST, _p('Validation errors.'), 'error')
+        transaction.commit()
+        self.REQUEST.response.write(
+            '<script>document.location.href="%s/edit"</script>' % (
+                self.absolute_url()))
+    self.REQUEST.response.write(
+        '<script>document.location.href="%s/view"</script>' % (
+            self.absolute_url()))
 
 
 def save_sample_data(self):
@@ -84,6 +120,10 @@ def save_sample_data(self):
 
         # TODO this is ignored and is probably meant to serve some purpose.
         del (row['Price excl Tax'])
+
+        if 'Sampler' in row.keys():
+            gridrow['Sampler'] = row['Sampler']
+            del (row['Sampler'])
 
         # ContainerType - not part of sample or AR schema
         if 'ContainerType' in row:

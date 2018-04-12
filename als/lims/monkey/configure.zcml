@@ -29,4 +29,10 @@
       replacement="als.lims.monkey.monkey_sampler_widgetvisibility.__call__"
       />
 
+  <monkey:patch
+      description="This modifies the workflow_before_validate method"
+      class="bika.lims.content.arimport.ARImport"
+      original="workflow_before_validate"
+      replacement="als.lims.monkey.monkey_arimport.workflow_before_validate"
+      />
 </configure>
