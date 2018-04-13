@@ -116,6 +116,7 @@ class AnalysisRequestSchemaModifier(object):
 
         # Sampler and DateSampled are now visible on AR Add.
         schema['Sampler'].widget.visible['add'] = 'edit'
+        schema['Sampler'].required = True
         schema['DateSampled'].widget.visible['add'] = 'edit'
 
         schema.moveField("SampleConditionText", after="SamplePoint")
