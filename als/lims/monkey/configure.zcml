@@ -35,4 +35,11 @@
       original="workflow_before_validate"
       replacement="als.lims.monkey.monkey_arimport.workflow_before_validate"
       />
+
+  <monkey:patch
+      description="This modifies the validate_headers method"
+      class="bika.lims.content.arimport.ARImport"
+      original="validate_headers"
+      replacement="als.lims.monkey.monkey_arimport.validate_headers"
+      />
 </configure>

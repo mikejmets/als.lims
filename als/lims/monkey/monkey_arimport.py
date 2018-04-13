@@ -28,6 +28,62 @@ from zope.event import notify
 _p = MessageFactory(u"plone")
 
 
+def validate_headers(self):
+    """Validate headers fields from schema
+    """
+
+    pc = getToolByName(self, 'portal_catalog')
+    pu = getToolByName(self, "plone_utils")
+
+    client = self.aq_parent
+
+    # Verify Client Name
+    if self.getClientName() != client.Title():
+        self.error("%s: value is invalid (%s)." % (
+            'Client name', self.getClientName()))
+
+    # Verify Client ID
+    if self.getClientID() != client.getClientID():
+        self.error("%s: value is invalid (%s)." % (
+            'Client ID', self.getClientID()))
+
+    existing_arimports = pc(portal_type='ARImport',
+                            review_state=['valid', 'imported'])
+
+    # Verify Client Reference
+    for arimport in existing_arimports:
+        if arimport.UID == self.UID() \
+                or not arimport.getClientReference():
+            continue
+        arimport = arimport.getObject()
+        if arimport.getClientReference() == self.getClientReference():
+            self.error('%s: already used by existing ARImport.' %
+                       'ClientReference')
+            break
+
+    # getCCContacts has no value if object is not complete (eg during test)
+    if self.getCCContacts():
+        cc_contacts = self.getCCContacts()[0]
+        contacts = [x for x in client.objectValues('Contact')]
+        contact_names = [c.Title() for c in contacts]
+        # validate Contact existence in this Client
+        for k in ['CCNamesReport', 'CCNamesInvoice']:
+            for val in cc_contacts[k]:
+                if val and val not in contact_names:
+                    self.error('%s: value is invalid (%s)' % (k, val))
+    else:
+        cc_contacts = {'CCNamesReport': [],
+                       'CCEmailsReport': [],
+                       'CCNamesInvoice': [],
+                       'CCEmailsInvoice': []
+                       }
+        # validate Contact existence in this Client
+        for k in ['CCEmailsReport', 'CCEmailsInvoice']:
+            for val in cc_contacts.get(k, []):
+                if val and not pu.validateSingleNormalizedEmailAddress(val):
+                    self.error('%s: value is invalid (%s)' % (k, val))
+
+
 def workflow_before_validate(self):
     """This function transposes values from the provided file into the
     ARImport object's fields, and checks for invalid values.
