@@ -1,5 +1,6 @@
 import App
 import csv
+import transaction
 import StringIO
 import os
 import tempfile
@@ -7,6 +8,7 @@ from bika.lims import bikaMessageFactory as _, t
 from bika.lims import logger
 from bika.lims.browser import BrowserView
 from DateTime import DateTime
+from bika.lims import api
 from bika.lims.browser.analysisrequest.publish import \
     AnalysisRequestPublishView as ARPV
 from bika.lims.browser.analysisrequest.publish import \
@@ -322,25 +324,6 @@ class AnalysisRequestPublishView(ARPV):
         # Generate a ARReport only for the 1st AR (if multiple ARs have
         # been selected)
         reportid = ar.generateUniqueId('ARReport')
-        coanr = reportid
-        report = _createObjectByType("ARReport", ar, reportid)
-        report.edit(
-            AnalysisRequest=ar.UID(),
-            Html=results_html,
-            Recipients=self.get_arreport_recip_records(ar)
-        )
-        report.unmarkCreationFlag()
-        renameAfterCreation(report)
-
-        # Set blob properties for fields containing file data
-        fn = reportid
-        fld = report.getField('Pdf')
-        fld.get(report).setFilename(fn + ".pdf")
-        fld.get(report).setContentType('application/pdf')
-        fld = report.getField('CSV')
-        fld.get(report).setFilename(fn + ".csv")
-        fld.get(report).setContentType('text/csv')
-
         # Modify the workflow state of each AR that's been published
         status = wf.getInfoFor(ar, 'review_state')
         transitions = {'verified': 'publish', 'published': 'republish'}
@@ -361,12 +344,33 @@ class AnalysisRequestPublishView(ARPV):
 
         # ALS hack.  Create the CSV they desire here now
         csvdata = self.create_als_csv(ars)
-
-        # set the pdf and csv data on the report
+        pc = getToolByName(self.context, 'portal_catalog')
+        query = {'portal_type': 'ARReport',
+                 'AnalysisRequest': ar.UID(),
+                 'path': {'query': api.get_path(ar),
+                          'depth': 1}, }
+        ar_reports = pc(query)
+        ar_reports = len(ar_reports) + 1
+        # Set blob properties for fields containing file data
+        fn = '{}-{}'.format(to_utf8(ar.getId()), ar_reports)
+        report = _createObjectByType("ARReport", ar, reportid)
         report.edit(
+            AnalysisRequest=ar.UID(),
+            Html=results_html,
+            Recipients=self.get_arreport_recip_records(ar),
             Pdf=pdf_report,
             CSV=csvdata,
+            COANR=fn,
         )
+        report.unmarkCreationFlag()
+        renameAfterCreation(report)
+        fld = report.getField('Pdf')
+        fld.get(report).setFilename(fn + ".pdf")
+        fld.get(report).setContentType('application/pdf')
+        fld = report.getField('CSV')
+        fld.get(report).setFilename(fn + ".csv")
+        fld.get(report).setContentType('text/csv')
+        transaction.commit()
 
         if len(ars) > 1:
             # publish and create links in the other ars
@@ -441,11 +445,11 @@ class AnalysisRequestPublishView(ARPV):
         mime_msg['To'] = ",".join(to)
 
         # Attach the pdf to the email
-        fn = "%s" % coanr
+        # fn = "%s" % coanr
         attachPdf(mime_msg, pdf_report, fn)
 
         # Attach to email
-        fn = coanr if coanr else '_'.join([ar.Title() for ar in ars])
+        # fn = coanr if coanr else '_'.join([ar.Title() for ar in ars])
         part = MIMEBase('text', "csv")
         part.add_header('Content-Disposition',
                         'attachment; filename="{}.csv"'.format(fn))

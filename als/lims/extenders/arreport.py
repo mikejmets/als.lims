@@ -1,5 +1,6 @@
 from archetypes.schemaextender.interfaces import IOrderableSchemaExtender
 from bika.lims.fields import ExtensionField
+from bika.lims.fields import ExtStringField
 from bika.lims.content.arreport import ARReport
 from plone.app.blob.field import BlobField
 from zope.component import adapts
@@ -21,7 +22,8 @@ class ARReportSchemaExtender(object):
     implements(IOrderableSchemaExtender)
 
     fields = [
-        CSVField('CSV')
+        CSVField('CSV'),
+        ExtStringField('COANR'),
     ]
 
     def __init__(self, context):

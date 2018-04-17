@@ -114,7 +114,10 @@ class AnalysisRequestPublishedResults(ARPR):
             # Grab the report object that the link points to
             obj = api.get_object_by_path(obj.remoteUrl)
 
-        item['COANR'] = obj.id
+        if hasattr(obj, 'COANR'):
+            item['COANR'] = obj.COANR
+        else:
+            item['COANR'] = obj.id
 
         item['PublishedBy'] = self.user_fullname(obj.Creator())
 
