@@ -23,7 +23,7 @@ class ARReportSchemaExtender(object):
 
     fields = [
         CSVField('CSV'),
-        ExtStringField('COANR'),
+        # ExtStringField('COANR'),
     ]
 
     def __init__(self, context):

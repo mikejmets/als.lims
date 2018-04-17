@@ -115,7 +115,7 @@ class AnalysisRequestPublishedResults(ARPR):
             obj = api.get_object_by_path(obj.remoteUrl)
 
         if hasattr(obj, 'COANR'):
-            item['COANR'] = obj.COANR
+            item['COANR'] = obj.getCOANR()
         else:
             item['COANR'] = obj.id
 
