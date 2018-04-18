@@ -110,14 +110,18 @@ class AnalysisRequestPublishedResults(ARPR):
 
     def folderitem(self, obj, item, index):
 
+        context = self.context
+        pc = getToolByName(self.context, 'portal_catalog')
         if obj.portal_type == 'Link':
             # Grab the report object that the link points to
-            obj = api.get_object_by_path(obj.remoteUrl)
+            # obj = api.get_object_by_path(obj.remoteUrl)
+            query = {'portal_type': 'ARReport',
+                     'AnalysisRequest': context.UID(),
+                     'path': {'query': api.get_path(context),
+                              'depth': 1}, }
+            obj = pc(query)[0].getObject()
 
-        if hasattr(obj, 'COANR'):
-            item['COANR'] = obj.getCOANR()
-        else:
-            item['COANR'] = obj.id
+        item['COANR'] = obj.id
 
         item['PublishedBy'] = self.user_fullname(obj.Creator())
 

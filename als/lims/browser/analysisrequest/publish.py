@@ -360,7 +360,6 @@ class AnalysisRequestPublishView(ARPV):
             Recipients=self.get_arreport_recip_records(ar),
             Pdf=pdf_report,
             CSV=csvdata,
-            COANR=fn,
         )
         report.unmarkCreationFlag()
         renameAfterCreation(report)
