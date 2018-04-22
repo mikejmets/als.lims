@@ -352,7 +352,7 @@ class AnalysisRequestPublishView(ARPV):
         ar_reports = pc(query)
         ar_reports = len(ar_reports) + 1
         # Set blob properties for fields containing file data
-        fn = '{}-{}'.format(to_utf8(ar.getId()), ar_reports)
+        # fn = '{}-{}'.format(to_utf8(ar.getId()), ar_reports)
         report = _createObjectByType("ARReport", ar, reportid)
         report.edit(
             AnalysisRequest=ar.UID(),
@@ -363,6 +363,7 @@ class AnalysisRequestPublishView(ARPV):
         )
         report.unmarkCreationFlag()
         renameAfterCreation(report)
+        fn = report.getId()
         fld = report.getField('Pdf')
         fld.get(report).setFilename(fn + ".pdf")
         fld.get(report).setContentType('application/pdf')
