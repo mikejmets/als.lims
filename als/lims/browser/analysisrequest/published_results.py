@@ -110,16 +110,17 @@ class AnalysisRequestPublishedResults(ARPR):
 
     def folderitem(self, obj, item, index):
 
-        context = self.context
         pc = getToolByName(self.context, 'portal_catalog')
         if obj.portal_type == 'Link':
             # Grab the report object that the link points to
             # obj = api.get_object_by_path(obj.remoteUrl)
+            report_id = obj.remoteUrl.split('/')[-1]
             query = {'portal_type': 'ARReport',
-                     'AnalysisRequest': context.UID(),
-                     'path': {'query': api.get_path(context),
-                              'depth': 1}, }
-            obj = pc(query)[0].getObject()
+                     'id': report_id,
+                     }
+            obj = pc(query)[0].getObject() if len(pc(query)) > 0 else None
+            if obj is None:
+                return item
 
         item['COANR'] = obj.id
 
