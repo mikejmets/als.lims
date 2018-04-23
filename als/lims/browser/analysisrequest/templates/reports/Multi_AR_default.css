@@ -121,6 +121,7 @@
 .header_td {
     text-align: center;
     padding:1px;
+    word-wrap: break-word;
 }
 
 .result{
