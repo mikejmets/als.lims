@@ -26,6 +26,10 @@
     padding-bottom:5px !important;
 }
 
+.ar_publish_page {
+    padding-top: 5px !important; 
+}
+
 .page-header {
     height: 76px;
 }
@@ -130,6 +134,7 @@
     font-weight:normal !important;
     font-style:italic !important;
     font-size:6pt;
+    text-align:center;
 }
 
 .ldl {
@@ -137,6 +142,7 @@
     font-weight:normal !important;
     font-style:italic !important;
     font-size:6pt;
+    text-align:center;
 }
 
 .cat_title {
@@ -175,6 +181,7 @@ table.signatories th {
 div.resultsinterpretation {
     border: none !important;
     border-top: 10px solid #ffffff;
+    width: 100% !important;
 }
 
 div.resultsinterpretation_heading {
@@ -183,6 +190,7 @@ div.resultsinterpretation_heading {
     padding:2px 0px 2px 0px;
     font-weight:bold;
     border-bottom:1px solid #cdcdcd;
+    width: 100% !important;
 }
 
 div.resultsinterpretation_dept_heading {
@@ -191,6 +199,7 @@ div.resultsinterpretation_dept_heading {
     padding:2px 0px 2px 0px;
     font-weight:bold;
     border:1px solid #cdcdcd;
+    width: 100% !important;
 }
 
 /* this is to reproduce table-like structure
