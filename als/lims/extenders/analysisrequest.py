@@ -8,9 +8,6 @@ from zope.component import adapts
 from zope.interface import implements
 
 
-
-
-
 class SampleConditionTextField(ExtStringField):
     """A computed field which sets and gets a value from Sample
     """
@@ -29,18 +26,17 @@ class SampleConditionTextField(ExtStringField):
         if sample and value:
             return sample.Schema()['SampleConditionText'].set(sample, value)
 
-SampleConditionText =  SampleConditionTextField(
-        'SampleConditionText',
-        widget=StringWidget(
-            label=_("Sample Condition"),
-            description= "",
-            visible={'view': 'visible',
-                     'edit': 'visible',
-                     'add': 'edit'},
-            render_own_label=True,
-            size=20
-        )
-    )
+SampleConditionText = SampleConditionTextField('SampleConditionText',
+                                               widget=StringWidget(
+                                                   label=_("Sample Condition"),
+                                                   description="",
+                                                   visible={'view': 'visible',
+                                                            'edit': 'visible',
+                                                            'add': 'edit'},
+                                                   render_own_label=True,
+                                                   size=20)
+                                               )
+
 
 class AnalysisRequestSchemaExtender(object):
     adapts(IAnalysisRequest)
@@ -118,6 +114,17 @@ class AnalysisRequestSchemaModifier(object):
         schema['Sampler'].widget.visible['add'] = 'edit'
         schema['Sampler'].required = True
         schema['DateSampled'].widget.visible['add'] = 'edit'
+
+        sampler_fields = ('Sampler', 'DateSampled',)
+        states = ['sample_registered',
+                  'to_be_sampled',
+                  'sample_due',
+                  'sample_received',
+                  'to_be_verified', ]
+        for fn in sampler_fields:
+            if fn in schema:
+                for state in states:
+                    schema[fn].widget.visible[state] = {'view': 'visible', 'edit': 'visible'}
 
         schema.moveField("SampleConditionText", after="SamplePoint")
 
