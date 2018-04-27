@@ -42,4 +42,12 @@
       original="validate_headers"
       replacement="als.lims.monkey.monkey_arimport.validate_headers"
       />
+
+  <monkey:patch
+      description="This modifies the analyses folderitem method"
+      class="bika.lims.browser.analysisrequest.analysisrequests.AnalysisRequestsView"
+      original="folderitem"
+      replacement="als.lims.monkey.monkey_analysisrequests.folderitem"
+      />
+
 </configure>
