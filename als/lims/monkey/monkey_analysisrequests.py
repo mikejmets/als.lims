@@ -231,6 +231,10 @@ def folderitem(self, obj, item, index):
         checkPermission = self.context.portal_membership.checkPermission
         state = api.get_workflow_status_of(obj, 'review_state')
         EDIT_INVISIBLE_LIST = ['verified', 'published', 'invalid', 'rejected']
+        if not obj.getDateSampled:
+            datesampled = self.ulocalized_time(
+                DateTime(), long_format=True)
+            item["class"]["getDateSampled"] = "provisional"
         if state not in EDIT_INVISIBLE_LIST \
                 and checkPermission("Modify portal content", obj):
             item['required'] = ['getDateSampled']
