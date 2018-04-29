@@ -50,4 +50,11 @@
       replacement="als.lims.monkey.monkey_analysisrequests.folderitem"
       />
 
+  <monkey:patch
+      description="This modifies the analyses folderitem method"
+      class="bika.lims.browser.client.workflow.ClientWorkflowAction"
+      original="__call__"
+      replacement="als.lims.monkey.monkey_client.__call__"
+      />
+
 </configure>
