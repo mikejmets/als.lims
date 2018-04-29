@@ -28,7 +28,6 @@ def __call__(self):
     # use came_from to decide which UI action was clicked.
     # "workflow_action" is the action name specified in the
     # portal_workflow transition url.
-    import pdb; pdb.set_trace()
     came_from = "workflow_action"
     action = form.get(came_from, '')
     if not action and not form.get('bika_listing_filter_bar_submit', ''):
