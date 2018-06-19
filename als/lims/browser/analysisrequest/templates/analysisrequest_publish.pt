@@ -21,7 +21,7 @@
         <div id="ar_publish_header" tal:condition="python:view.showOptions()">
             <div id='options_handler'>
                 <div class='options-line'>
-                    <label for="sel_format" i18n:translate="">Templatessss</label>
+                    <label for="sel_format" i18n:translate="">Template</label>
                     <select id="sel_format" name="sel_format">
                         <tal:formats tal:repeat="format python:view.getAvailableFormats()">
                             <tal:format define="current python:request.get('template', view._DEFAULT_TEMPLATE);">
