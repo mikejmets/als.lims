@@ -31,12 +31,12 @@
     that = this;
     referrer_cookie_name = '_arpv';
     papersize_default = 'A4';
-    default_margins = [20, 20, 20, 20];
+    default_margins = [25, 25, 15, 25];
     papersizes = {
       'A4': {
         size: 'A4',
         dimensions: [210, 297],
-        margins: [10, 10, 10, 10]
+        margins: [25, 25, 15, 25]
       },
       'letter': {
         size: 'letter',
