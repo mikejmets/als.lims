@@ -5,7 +5,6 @@
   <tal:report tal:define="num_ars_per_page python:5;
                           argroup          python:view.getAnalysisRequestGroup();
                           arspage          python:[argroup[i:i+num_ars_per_page] for i in range(0,len(argroup),num_ars_per_page)];
-                          coanr            python:view.next_certificate_number();
                           firstar          python:arspage[0][0];
                           analysisrequest  python:view.getAnalysisRequest(firstar);
                           portal           analysisrequest/portal;
@@ -16,9 +15,6 @@
                           acc_logo         python:lab.getAccreditationBodyLogo();">
 
     <div id="section-info">
-      <!-- This is required -->
-      <input type="hidden" name="coanr" tal:attributes="value python:coanr"/>
-
       <div id="section-info-heading">
         <h1 i18n:translate="">CERTIFICATE OF ANALYSIS</h1>
       </div>
@@ -95,7 +91,7 @@
         </tr>
         <tr>
           <th i18n:translate="" class="label">Certificate Number</th>
-          <td tal:content="structure coanr"/>
+          <td>COA ID is generated on publication</td>
         </tr>
       </table>
 
@@ -393,7 +389,7 @@
                 <span class="page-current-num"></span> of
                 <span class="page-total-count"></span></div>
             </td>
-            <td align="right" tal:content="coanr"></td>
+            <td align="right">COA ID is generated on publication</td>
           </tr>
         </table>
       </div>
@@ -416,7 +412,7 @@
                 <span class="page-current-num"></span> of
                 <span class="page-total-count"></span></div>
             </td>
-            <td align="right" tal:content="coanr"></td>
+            <td align="right">COA ID is generated on publication</td>
           </tr>
         </table>
       </div>

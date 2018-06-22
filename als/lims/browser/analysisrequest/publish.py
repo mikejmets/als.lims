@@ -333,6 +333,15 @@ class AnalysisRequestPublishView(ARPV):
         except WorkflowException:
             pass
 
+        report = _createObjectByType("ARReport", ar, reportid)
+        report.edit(
+            AnalysisRequest=ar.UID(),
+        )
+        report.unmarkCreationFlag()
+        renameAfterCreation(report)
+        fn = report.getId()
+        coa_nr_text = 'COA ID is generated on publication'
+        results_html = results_html.replace(coa_nr_text, fn)
         # Create the pdf report for the supplied HTML.
         pdf_report = createPdf(results_html, False)
         # PDF written to debug file?
@@ -344,26 +353,12 @@ class AnalysisRequestPublishView(ARPV):
 
         # ALS hack.  Create the CSV they desire here now
         csvdata = self.create_als_csv(ars)
-        pc = getToolByName(self.context, 'portal_catalog')
-        query = {'portal_type': 'ARReport',
-                 'AnalysisRequest': ar.UID(),
-                 'path': {'query': api.get_path(ar),
-                          'depth': 1}, }
-        ar_reports = pc(query)
-        ar_reports = len(ar_reports) + 1
-        # Set blob properties for fields containing file data
-        # fn = '{}-{}'.format(to_utf8(ar.getId()), ar_reports)
-        report = _createObjectByType("ARReport", ar, reportid)
         report.edit(
-            AnalysisRequest=ar.UID(),
             Html=results_html,
             Recipients=self.get_arreport_recip_records(ar),
             Pdf=pdf_report,
             CSV=csvdata,
         )
-        report.unmarkCreationFlag()
-        renameAfterCreation(report)
-        fn = report.getId()
         fld = report.getField('Pdf')
         fld.get(report).setFilename(fn + ".pdf")
         fld.get(report).setContentType('application/pdf')
