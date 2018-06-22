@@ -6,6 +6,8 @@
 # Some rights reserved. See LICENSE.txt, AUTHORS.txt.
 
 import transaction
+from DateTime import DateTime
+from bika.lims.browser import ulocalized_time
 from bika.lims.content.analysisrequest import schema as ar_schema
 from bika.lims.content.sample import schema as sample_schema
 from bika.lims.utils import getUsers
@@ -107,6 +109,19 @@ def workflow_before_validate(self):
         row_nr += 1
         if item_empty(gridrow, 'Sampler'):
             self.error("Row %s: %s is required" % (row_nr, 'Sampler'))
+        for key in ('DateSampled',):
+            if item_empty(gridrow, key):
+                self.error("Row %s: %s is required" % (row_nr, key))
+        dateSampled = gridrow.get('DateSampled', '')
+        try:
+            new = DateTime(dateSampled)
+            if DateTime(dateSampled) > DateTime():
+                self.error("Row %s: DateSampled must be a past date" % row_nr)
+            ulocalized_time(
+                new, long_format=True, time_only=False, context=self)
+        except:
+            self.error(
+                "Row %s: DateSampled format must be 2017-06-21" % row_nr)
 
     self.validate_headers()
     self.validate_samples()
@@ -176,6 +191,18 @@ def save_sample_data(self):
 
         # TODO this is ignored and is probably meant to serve some purpose.
         del (row['Price excl Tax'])
+
+        DateSampled = '{} {}'.format(row['DateSampled'], row['TimeSampled'])
+        if len(DateSampled) == 0:
+            errors.append("Row %s: DateSampled is required" % row_nr)
+        try:
+            DateTime(DateSampled)
+            gridrow['DateSampled'] = '{} {}'.format(row['DateSampled'],
+                                                    row['TimeSampled'])
+            del (row['DateSampled'])
+            del (row['TimeSampled'])
+        except:
+            errors.append("Row %s: DateSampled format is incorrect" % row_nr)
 
         if 'Sampler' in row.keys():
             gridrow['Sampler'] = row['Sampler']
