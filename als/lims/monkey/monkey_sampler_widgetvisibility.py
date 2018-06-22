@@ -3,7 +3,7 @@ def __call__(self, context, mode, field, default):
     https://jira.bikalabs.com/browse/AN-182 so that Sampler can be 
     shown on AR Create
     """
-    fields = ['SamplingDate']
+    fields = ['SamplingDate', 'DateSampled']
     state = default if default else 'invisible'
     fieldName = field.getName()
     if fieldName not in fields:
@@ -20,7 +20,21 @@ def __call__(self, context, mode, field, default):
     # - DateSampled: invisible during creation.
     # - SamplingDate and Sampler: visible and editable until sample due.
     if swf_enabled:
-        if fieldName in fields:
+        if fieldName == 'DateSampled':
+            if mode == 'add':
+                state = 'edit'
+                field.required = 1
+            elif mode == 'edit':
+                state = 'invisible'
+            elif mode == 'view':
+                state = 'visible'
+            elif mode == 'header_table':
+                # In the Schema definition, DateSampled is 'prominent' for
+                # 'header_table' to let users edit it after receiving
+                # the Sample. But if SWF is disabled, DateSampled must be
+                # filled during creation and never editable.
+                state = 'visible'
+        elif fieldName in fields:
             if mode == 'header_table':
                 state = 'prominent'
             elif mode == 'view':
@@ -31,6 +45,20 @@ def __call__(self, context, mode, field, default):
     #                 required in 'add' view.
     #  - 'SamplingDate' and 'Sampler': disabled everywhere.
     else:
-        if fieldName in fields:
+        if fieldName == 'DateSampled':
+            if mode == 'add':
+                state = 'edit'
+                field.required = 1
+            elif mode == 'edit':
+                state = 'invisible'
+            elif mode == 'view':
+                state = 'visible'
+            elif mode == 'header_table':
+                # In the Schema definition, DateSampled is 'prominent' for
+                # 'header_table' to let users edit it after receiving
+                # the Sample. But if SWF is disabled, DateSampled must be
+                # filled during creation and never editable.
+                state = 'visible'
+        elif fieldName in fields:
             state = 'invisible'
     return state
