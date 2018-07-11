@@ -8,7 +8,6 @@ from bika.lims import bikaMessageFactory as _, t
 from bika.lims import logger
 from bika.lims.browser import BrowserView
 from DateTime import DateTime
-from bika.lims import api
 from bika.lims.browser.analysisrequest.publish import \
     AnalysisRequestPublishView as ARPV
 from bika.lims.browser.analysisrequest.publish import \
@@ -305,6 +304,78 @@ class AnalysisRequestPublishView(ARPV):
                 publishedars.extend(ars)
         return publishedars
 
+    def get_mail_subject(self, ars):
+        """Returns the email subject in accordance with the client
+        preferences
+        """
+        client = ars[0].aq_parent
+        subject_items = client.getEmailSubject()
+        ai = co = cr = cs = False
+        if 'ar' in subject_items:
+            ai = True
+        if 'co' in subject_items:
+            co = True
+        if 'cr' in subject_items:
+            cr = True
+        if 'cs' in subject_items:
+            cs = True
+        ais = []
+        cos = []
+        crs = []
+        css = []
+        for ar in ars:
+            blanks_found = False
+            if ai:
+                ais.append(ar.getId())
+            if co:
+                if ar.getClientOrderNumber():
+                    if not ar.getClientOrderNumber() in cos:
+                        cos.append(ar.getClientOrderNumber())
+                else:
+                    blanks_found = True
+            if cr or cs:
+                sample = ar.getSample()
+                if cr:
+                    if sample.getClientReference():
+                        if not sample.getClientReference() in crs:
+                            crs.append(sample.getClientReference())
+                    else:
+                        blanks_found = True
+                if cs:
+                    if sample.getClientSampleID():
+                        if not sample.getClientSampleID() in css:
+                            css.append(sample.getClientSampleID())
+                    else:
+                        blanks_found = True
+            line_items = []
+            if ais:
+                ais.sort()
+                li = t(_('ARs: ${ars}', mapping={'ars': ', '.join(ais)}))
+                line_items.append(li)
+            if cos:
+                cos.sort()
+                li = t(_('Orders: ${orders}', mapping={'orders': ', '.join(cos)}))
+                line_items.append(li)
+            if crs:
+                crs.sort()
+                li = t(_(
+                    'Refs: ${references}', mapping={'references': ', '.join(crs)}))
+                line_items.append(li)
+            if css:
+                css.sort()
+                li = t(_(
+                    'Samples: ${samples}', mapping={'samples': ', '.join(css)}))
+                line_items.append(li)
+        tot_line = ' '.join(line_items)
+        if tot_line:
+            subject = t(_('Analysis results for ${subject_parts}',
+                          mapping={'subject_parts': tot_line}))
+            if blanks_found:
+                subject += (' ' + t(_('and others')))
+        else:
+            subject = t(_('Analysis results'))
+        return subject, tot_line
+
     def publishFromHTML(self, ar_uids, results_html):
         """ar_uids can be a single UID or a list of AR uids.  The resulting
         ARs will be published together (ie, sent as a single outbound email)
@@ -391,8 +462,9 @@ class AnalysisRequestPublishView(ARPV):
         # https://github.com/bikalabs/Bika-LIMS/issues/1028
         lab = ars[0].bika_setup.laboratory
         mime_msg = MIMEMultipart('related')
-        mime_msg['Subject'] = "Published results for %s" % \
-                              ",".join([ar.Title() for ar in ars])
+        mime_msg['Subject'] = self.get_mail_subject(ars)[0]
+        # mime_msg['Subject'] = "Published results for %s" % \
+        #                       ",".join([ar.Title() for ar in ars])
         mime_msg['From'] = formataddr(
             (encode_header(lab.getName()), lab.getEmailAddress()))
         mime_msg.preamble = 'This is a multi-part MIME message.'
@@ -430,8 +502,9 @@ class AnalysisRequestPublishView(ARPV):
         # Create the new mime_msg object, cause the previous one
         # has the pdf already attached
         mime_msg = MIMEMultipart('related')
-        mime_msg['Subject'] = "Published results for %s" % \
-                              ",".join([ar.Title() for ar in ars])
+        mime_msg['Subject'] = self.get_mail_subject(ars)[0]
+        # mime_msg['Subject'] = "Published results for %s" % \
+        #                       ",".join([ar.Title() for ar in ars])
         mime_msg['From'] = formataddr(
             (encode_header(lab.getName()), lab.getEmailAddress()))
         mime_msg.preamble = 'This is a multi-part MIME message.'
