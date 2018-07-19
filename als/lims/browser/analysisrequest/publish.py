@@ -411,8 +411,9 @@ class AnalysisRequestPublishView(ARPV):
         report.unmarkCreationFlag()
         renameAfterCreation(report)
         fn = report.getId()
+        reports_link = "<a href='{}'>{}</a>".format(ar.absolute_url(), fn)
         coa_nr_text = 'COA ID is generated on publication'
-        results_html = results_html.replace(coa_nr_text, fn)
+        results_html = results_html.replace(coa_nr_text, reports_link)
         # Create the pdf report for the supplied HTML.
         pdf_report = createPdf(results_html, False)
         # PDF written to debug file?
