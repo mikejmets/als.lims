@@ -8,7 +8,7 @@
                           firstar          python:arspage[0][0];
                           analysisrequest  python:view.getAnalysisRequest(firstar);
                           portal           analysisrequest/portal;
-                          client           python:analysisrequest['client']['obj'];
+                          client           python:analysisrequest['client'];
                           batch            python:analysisrequest['obj'].getBatch();
                           contact          python:analysisrequest['obj'].getContact();
                           lab              python:portal['obj'].bika_setup.laboratory;
@@ -26,7 +26,8 @@
             <table>
               <tr>
                 <th i18n:translate="" class="label">Client</th>
-                <td tal:content="python:client.Title()"/>
+                <td><a tal:attributes="href python:client['url']"
+                       tal:content="python:client['obj'].Title()"/></td>
               </tr>
               <tr>
                 <th i18n:translate="" class="label">Contact</th>
@@ -36,13 +37,13 @@
                 <th i18n:translate="" class="label">Email</th>
                 <td id="client-email">
                   <a tal:content="python:contact.getEmailAddress()"
-                     tal:attributes="url python:'mailto:%s' % contact.getEmailAddress()"/>
+                     tal:attributes="href python:'mailto:%s' % contact.getEmailAddress()"/>
                 </td>
               </tr>
               <tr>
                 <th i18n:translate="" class="label">Telephone
                 </th>
-                <td tal:content="structure python: client.getPhone()"/>
+                <td tal:content="structure python: client['phone']"/>
               </tr>
               <tr>
                 <th i18n:translate="" class="label">Address</th>
@@ -55,13 +56,13 @@
               <tr>
                 <th i18n:translate="" class="label">Laboratory
                 </th>
-                <td tal:content="python: lab.Title()"/>
+                <td><a tal:attributes="href python: lab.absolute_url()" tal:content="python: lab.Title()"/></td>
               </tr>
               <tr>
                 <th i18n:translate="" class="label">Email</th>
                 <td>
                   <a tal:content="python:lab.getEmailAddress()"
-                     tal:attributes="url python:'mailto:%s' % lab.getEmailAddress()"/>
+                     tal:attributes="href python:'mailto:%s' % lab.getEmailAddress()"/>
                 </td>
               </tr>
               <tr>
@@ -118,8 +119,9 @@
         </div>
         <div tal:condition="python:lab.getLaboratoryAccredited()" i18n:translate="">
           Methods included in the
-          <tal:block replace="python:lab.getAccreditationBody()" i18n:name="accreditation_body"/>
-          schedule of Accreditation for this Laboratory are marked with
+          <a tal:attributes="href python: lab.getAccreditationBodyURL()"
+            tal:content="python:lab.getAccreditationBody()" i18n:name="accreditation_body"/> schedule of 
+          <a tal:attributes="href python:portal['url']+'/'+lab.absolute_url()+'#fieldsetlegend-accreditation'">Accreditation for this Laboratory</a> are marked with
           <img tal:attributes='src python:portal["url"]+"/++resource++bika.lims.images/accredited.png";' class="accredited-ico"/>
         </div>
         <div tal:condition="python:lab.getLaboratoryAccredited()" i18n:translate="">
@@ -144,9 +146,11 @@
                   </a>
                 </td>
                 <td style="text-align:right !important;">
-                  <img tal:condition="acc_logo"
-                       style="height:35px;"
-                       tal:attributes="src python:portal['url'] +'/'+ acc_logo.absolute_url()"/>
+                  <a tal:attributes="href python:portal['url']+'/'+lab.absolute_url()+'#fieldsetlegend-accreditation'">
+                      <img tal:condition="acc_logo"
+                           style="height:35px;"
+                           tal:attributes="src python:portal['url'] +'/'+ acc_logo.absolute_url()"/>
+                  </a>
                 </td>
               </tr>
             </table>
@@ -173,8 +177,9 @@
                   i18n:translate="">Laboratory Analysis Request ID</span>
             <tal:ar repeat="ar ars">
               <span class="td header_td"
-                    tal:attributes="style string:width:${arcol_width}%;;border-top:1px solid #cdcdcd;"
-                    tal:content="python:ar.getId()"/>
+                    tal:attributes="style string:width:${arcol_width}%;;border-top:1px solid #cdcdcd;">
+                    <a tal:attributes="href python: ar.absolute_url()" tal:content="python:ar.getId()"/>
+              </span>
             </tal:ar>
           </div>
           <div class="row">
@@ -193,8 +198,10 @@
                   i18n:translate="">Client Batch ID</span>
             <tal:ar repeat="ar ars">
               <span class="td header_td"
-                    tal:attributes="style string:width:${arcol_width}%;;border-top:1px solid #cdcdcd;"
-                    tal:content="python:batch.getClientBatchID() if batch else ''"/>
+                    tal:attributes="style string:width:${arcol_width}%;;border-top:1px solid #cdcdcd;">
+                    <a tal:attributes="href python:batch.absolute_url() if batch else ''"
+                       tal:content="python:batch.getClientBatchID() if batch else ''"/>
+              </span>
             </tal:ar>
           </div>
           <div class="row">
@@ -375,7 +382,9 @@
           </tr>
           <tal:manager tal:repeat="manager mngr_ids">
             <tr>
-              <td class="manager-fullname" tal:content="python:managers[manager]['name']"/>
+              <td class="manager-fullname">
+                <a tal:attributes="href python:'mailto:%s' % managers[manager]['email']"
+                   tal:content="python:managers[manager]['name']"/>
               <td class="manager-jobtitle" tal:content="python:managers[manager]['job_title']"/>
               <td class="manager-department" tal:content="python:managers[manager]['departments']"/>
             </tr>
