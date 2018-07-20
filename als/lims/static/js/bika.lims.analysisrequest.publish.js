@@ -28,6 +28,7 @@
 
   window.AnalysisRequestPublishView = function() {
     var applyMargin, convert_svgs, default_margins, getPaperSize, load_barcodes, load_layout, papersize_default, papersizes, referrer_cookie_name, reloadReport, that;
+    var clicked_twice = 0;
     that = this;
     referrer_cookie_name = '_arpv';
     papersize_default = 'A4';
@@ -361,6 +362,12 @@
       });
       $('#publish_button').click(function(e) {
         var count, hvisible, qcvisible, template, url;
+        clicked_twice += 1;
+        if (clicked_twice == 2 ){
+            $('#publish_button').prop('disabled', true);
+            alert('Already publishing please be patient')
+                return false
+        }
         url = window.location.href;
         qcvisible = $('#qcvisible').is(':checked') ? 1 : 0;
         hvisible = $('#hvisible').is(':checked') ? 1 : 0;
