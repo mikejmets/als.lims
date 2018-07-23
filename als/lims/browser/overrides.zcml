@@ -72,4 +72,12 @@
       permission="bika.lims.ManageAnalysisRequests"
       layer="bika.lims.interfaces.IBikaLIMS"
   />
+
+  <browser:page
+      for="*"
+      name="base_view"
+      class="als.lims.browser.arreport.ARReportViewView"
+      permission="bika.lims.ManageAnalysisRequests"
+      layer="bika.lims.interfaces.IBikaLIMS"
+  />
 </configure>
