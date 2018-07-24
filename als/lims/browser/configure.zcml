@@ -10,6 +10,14 @@
             name="als-stickers"
     />
 
+  <browser:page
+      for="bika.lims.content.arreport.ARReport"
+      name="base_view"
+      class="als.lims.browser.arreport.ARReportViewView"
+      permission="bika.lims.ManageAnalysisRequests"
+      layer="bika.lims.interfaces.IBikaLIMS"
+  />
+
 <!--
 <plone:static
             directory="reports"
