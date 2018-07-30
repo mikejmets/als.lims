@@ -365,7 +365,7 @@
         clicked_twice += 1;
         if (clicked_twice == 2 ){
             $('#publish_button').prop('disabled', true);
-            alert('Already publishing please be patient')
+            alert('COA publication is under way and the published ARs will be listed shortly. If it is a big publication with many Analysis Requests, it may take a few minutes')
                 return false
         }
         url = window.location.href;
