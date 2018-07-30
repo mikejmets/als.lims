@@ -24,6 +24,7 @@
 
 
   <include package="z3c.jbot" file="meta.zcml" />
+  <include package="bika.lims" file="permissions.zcml" />
   <browser:jbot directory="jbot" />
 
   <include file="permissions.zcml" />

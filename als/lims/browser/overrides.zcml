@@ -72,4 +72,5 @@
       permission="bika.lims.ManageAnalysisRequests"
       layer="bika.lims.interfaces.IBikaLIMS"
   />
+
 </configure>

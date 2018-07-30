@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+    metal:use-macro="here/main_template/macros/master"
+    i18n:domain="bika">
+<head><title></title></head>
+
+<body>
+
+<metal:content-title fill-slot="content-title">
+    <h1>
+        <img tal:condition="view/icon | nothing"
+            src="" tal:attributes="src view/icon"/>
+        <span class="documentFirstHeading" tal:content="context/id"></span>
+    </h1>
+</metal:content-title>
+
+<metal:content-description fill-slot="content-description">
+</metal:content-description>
+
+  <metal:content-core
+      fill-slot="content-core">
+        <div class="field">
+            <label>Analysis Requests: </label>
+            <br />
+            <tal:ar repeat="ar view/ars_id_and_url">
+                <span><a tal:attributes="href python:ar['url']"
+                         tal:content="python:ar['ar_id']"/>
+                <span tal:condition="not: repeat/ar/end">,</span>
+                </span>
+            </tal:ar>
+
+        </div>
+        <div class="field">
+            <label>Client Sample ID(s): </label>
+            <br />
+            <p tal:content="view/csids">
+        </div>
+        <div class="field">
+            <label>Pdf:</label><br />
+            <span>
+                <img tal:attributes="src view/icon_pdf" alt="PDF document icon"/>
+                <a tal:attributes="href python:context.absolute_url()+'/at_download/Pdf'"
+                   tal:content="python:context.id+'.pdf'"/>
+                <span class="discreet" tal:content="python:'- PDF document'+ ' '+ str(context.getPdf().get_size())+' '+ 'bytes'"></span>
+            </span>
+            <br />
+        </div>
+        <div class="field">
+            <label>CSV:</label><br />
+            <span>
+                <img tal:attributes="src view/icon_csv" alt="CSV document icon"/>
+                <a tal:attributes="href python:context.absolute_url()+'/at_download/CSV'"
+                   tal:content="python:context.id+'.csv'"/>
+                <span class="discreet" tal:content="python:'- CSV document' + ' '+str(context.CSV.get_size())+' ' + 'bytes'"></span>
+            </span>
+        </div>
+        <div class="field">
+            <label>Recipients</label><br />
+            <tal:recipients repeat="rec python:context.getRecipients()">
+                <span tal:content="python:rec['Fullname']"/>
+                (<span tal:content="python:rec['EmailAddress']"/>)<br />
+            </tal:recipients>
+        </div>
+        <div class="field">
+            <label>SMS</label><br />
+            <span tal:content="python:context.getSMS()"/>
+        </div>
+        <div class="field">
+            <label>Date Printed</label><br />
+            <span tal:content="python:context.getDatePrinted()"/>
+        </div>
+
+
+
+
+</metal:content-core>
+</body>
+</html>
